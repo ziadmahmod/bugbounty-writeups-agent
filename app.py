@@ -1,6 +1,7 @@
 """
-Writeup Agent — Local Flask server that uses your Claude Max subscription
-via the `claude` CLI to summarize bug bounty writeups into Obsidian notes.
+Bugbounty Writeups Agent — Local Flask server that uses any of several AI
+backends (Claude CLI, Gemini CLI, Qwen CLI, OpenCode, or HTTP APIs) to
+summarize bug bounty writeups into Obsidian notes.
 
 Run: python app.py
 Then open: http://localhost:5050
@@ -1000,7 +1001,7 @@ def check_claude_compat():
 
 if __name__ == "__main__":
     print("┌──────────────────────────────────────────────────────────────┐")
-    print("│  Writeup Agent — Local Obsidian writeup summarizer           │")
+    print("│  Bugbounty Writeups Agent — Local writeup → Obsidian note    │")
     print("│  Powered by Claude Code (Max subscription)                   │")
     print("├──────────────────────────────────────────────────────────────┤")
     print(f"│  Config:  {CONFIG_PATH}")

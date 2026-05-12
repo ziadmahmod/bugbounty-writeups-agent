@@ -1,4 +1,4 @@
-# Obsidian Writeup Agent 🎯
+# Bugbounty Writeups Agent 🎯
 
 A local Flask app that turns any bug-bounty writeup URL into a structured **Obsidian note** with a deep analysis written in Arabic Egyptian — images included, organized, ready to study.
 
@@ -41,8 +41,8 @@ Use your existing AI subscription (Claude Max, Gemini free tier, Qwen, etc.) —
 ### 🪟 Windows
 
 ```powershell
-git clone https://github.com/ziadmahmod/obsidian-writeup-agent.git
-cd obsidian-writeup-agent
+git clone https://github.com/ziadmahmod/bugbounty-writeups-agent.git
+cd bugbounty-writeups-agent
 
 python -m venv venv
 venv\Scripts\activate
@@ -69,8 +69,8 @@ The server will now start silently in the background every time you log in.
 ### 🍎 macOS / 🐧 Linux
 
 ```bash
-git clone https://github.com/ziadmahmod/obsidian-writeup-agent.git
-cd obsidian-writeup-agent
+git clone https://github.com/ziadmahmod/bugbounty-writeups-agent.git
+cd bugbounty-writeups-agent
 
 python3 -m venv venv
 source venv/bin/activate
