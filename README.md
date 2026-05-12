@@ -26,6 +26,7 @@ Use your existing AI subscription (Claude Max, Gemini free tier, Qwen, etc.) —
      - [Claude Code](https://claude.com/product/claude-code) (needs Claude Max subscription)
      - [Gemini CLI](https://github.com/google-gemini/gemini-cli) (Google login, ~1500 free requests/day on Flash)
      - [Qwen Code CLI](https://github.com/QwenLM/qwen-code)
+     - [OpenCode](https://opencode.ai) (open-source agent, works with any provider)
    - **HTTP APIs** — need an API key:
      - [OpenAI](https://platform.openai.com/api-keys) (ChatGPT)
      - [Anthropic](https://console.anthropic.com/)
@@ -110,6 +111,7 @@ Open **http://localhost:5050**.
 | **Gemini CLI** (Pro) | ❌ Google login | Free (~50 req/day) | ~30s | Higher quality, tight quota |
 | **Claude CLI** | ❌ Max subscription | $20/month | ~90s | Highest quality output |
 | **Qwen Code CLI** | ❌ Login required | Free tier limited | ~200s | Backup option |
+| **OpenCode CLI** | ❌ (per-provider auth) | Depends on provider | varies | Use any model with one CLI — needs `opencode auth login` |
 | **OpenAI** | ✅ | Pay-per-use | ~10–15s | Cheap with gpt-4o-mini |
 | **Anthropic API** | ✅ | Pay-per-use | ~20s | Use Haiku for speed |
 | **Gemini API** | ✅ | Free tier exists | ~10s | Separate quota from CLI |

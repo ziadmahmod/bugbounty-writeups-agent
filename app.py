@@ -25,9 +25,10 @@ def _cli_bin(name: str) -> str:
 # Local CLIs that authenticate via their own login flow (no API key needed
 # in our config) and follow the same `<bin> -p` / `--model` invocation shape.
 LOCAL_CLI_BINARIES = {
-    "claude_cli": ("claude", "Claude CLI"),
-    "gemini_cli": ("gemini", "Gemini CLI"),
-    "qwen_cli":   ("qwen",   "Qwen Code CLI"),
+    "claude_cli":   ("claude",   "Claude CLI"),
+    "gemini_cli":   ("gemini",   "Gemini CLI"),
+    "qwen_cli":     ("qwen",     "Qwen Code CLI"),
+    "opencode_cli": ("opencode", "OpenCode CLI"),
 }
 
 import requests
@@ -67,6 +68,7 @@ PROVIDER_DEFAULT_MODEL = {
     "claude_cli": "sonnet",
     "gemini_cli": "",   # Gemini CLI picks its own default (gemini-2.5-pro)
     "qwen_cli":   "",   # Qwen CLI picks its own default (qwen3-coder-plus)
+    "opencode_cli": "anthropic/claude-sonnet-4-5-20250929",  # provider/model format
     "openai": "gpt-4o-mini",
     "anthropic_api": "claude-sonnet-4-5-20250929",
     "gemini": "gemini-2.0-flash",
@@ -395,6 +397,29 @@ def call_local_cli(prompt: str, binary: str, friendly_name: str, model: str = ""
         the prompt comes from stdin per its docs ("Appended to input on stdin").
       - qwen: same shape as gemini; harmless to also pass `-p ""`.
     """
+    if binary == "opencode":
+        # opencode uses a subcommand instead of -p, and takes the message as a
+        # positional arg (or stdin if none). We pass on stdin so prompts of
+        # any size work on Windows (no command-line length limit).
+        cmd = [_cli_bin(binary), "run"]
+        if model:
+            cmd += ["--model", model]
+        try:
+            result = subprocess.run(
+                cmd, input=prompt, capture_output=True,
+                text=True, timeout=900, encoding="utf-8",
+            )
+        except FileNotFoundError:
+            raise RuntimeError(
+                f"أمر `{binary}` مش موجود في الـ PATH. اتأكد إن {friendly_name} متثبت."
+            )
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"{friendly_name} خد وقت أكتر من 15 دقيقة.")
+        if result.returncode != 0:
+            err = (result.stderr or result.stdout or "").strip()[:800]
+            raise RuntimeError(f"{friendly_name} رجع error (code {result.returncode}):\n{err}")
+        return result.stdout.strip()
+
     cmd = [_cli_bin(binary), "-p"]
     if binary in ("gemini", "qwen"):
         cmd.append("")

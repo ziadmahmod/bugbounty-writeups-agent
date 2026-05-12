@@ -596,6 +596,7 @@
           <option value="claude_cli">Claude CLI (Claude Max)</option>
           <option value="gemini_cli">Gemini CLI (Google login — في free tier)</option>
           <option value="qwen_cli">Qwen Code CLI (Alibaba — في free tier)</option>
+          <option value="opencode_cli">OpenCode CLI (open-source، أي provider)</option>
         </optgroup>
         <optgroup label="HTTP APIs (محتاج API key)">
           <option value="openai">OpenAI (ChatGPT)</option>
@@ -632,6 +633,31 @@
         <option value="">Default (اللي الـ CLI بيختاره)</option>
       </select>
       <div class="field-hint">الـ aliases (sonnet/opus/haiku) بتتحدث تلقائياً للأحدث. الـ specific IDs مش بتتغير.</div>
+    </div>
+    <div class="field" id="modelOpenCodeField">
+      <label for="modelOpenCode">موديل OpenCode</label>
+      <select id="modelOpenCode">
+        <optgroup label="Anthropic">
+          <option value="anthropic/claude-sonnet-4-5-20250929">anthropic/claude-sonnet-4-5 (Recommended)</option>
+          <option value="anthropic/claude-haiku-4-5-20251001">anthropic/claude-haiku-4-5 — أسرع</option>
+          <option value="anthropic/claude-opus-4-7">anthropic/claude-opus-4-7 — الأقوى</option>
+        </optgroup>
+        <optgroup label="OpenAI">
+          <option value="openai/gpt-4o-mini">openai/gpt-4o-mini — رخيص وسريع</option>
+          <option value="openai/gpt-4o">openai/gpt-4o</option>
+          <option value="openai/o1-mini">openai/o1-mini</option>
+        </optgroup>
+        <optgroup label="Google">
+          <option value="google/gemini-2.5-flash">google/gemini-2.5-flash</option>
+          <option value="google/gemini-2.5-pro">google/gemini-2.5-pro</option>
+        </optgroup>
+        <optgroup label="OpenRouter / Groq">
+          <option value="openrouter/anthropic/claude-sonnet-4">openrouter/anthropic/claude-sonnet-4</option>
+          <option value="groq/llama-3.3-70b-versatile">groq/llama-3.3-70b-versatile — أسرع حاجة</option>
+        </optgroup>
+        <option value="">Default (اللي الـ CLI بيختاره)</option>
+      </select>
+      <div class="field-hint">صيغة <code>provider/model</code>. لازم تعمل <code>opencode auth login</code> الأول للـ provider اللي بتستخدمه.</div>
     </div>
     <div class="field" id="modelQwenField">
       <label for="modelQwen">موديل Qwen</label>
@@ -768,20 +794,22 @@ async function checkClaude() {
 }
 
 // ─── Provider UI helpers ────────────────────────────────
-const LOCAL_CLI_PROVIDERS = ['claude_cli', 'gemini_cli', 'qwen_cli'];
+const LOCAL_CLI_PROVIDERS = ['claude_cli', 'gemini_cli', 'qwen_cli', 'opencode_cli'];
 const MODEL_PLACEHOLDER = {
   claude_cli: 'sonnet',
   gemini_cli: 'gemini-2.5-pro (CLI default)',
   qwen_cli: 'qwen3-coder-plus (CLI default)',
+  opencode_cli: 'anthropic/claude-sonnet-4-5-20250929',
   openai: 'gpt-4o-mini',
   anthropic_api: 'claude-sonnet-4-5-20250929',
   gemini: 'gemini-2.0-flash',
   openrouter: 'google/gemini-2.5-flash',
 };
 const PROVIDERS_WITH_MODEL_DROPDOWN = {
-  claude_cli: 'modelClaudeField',
-  gemini_cli: 'modelGeminiField',
-  qwen_cli:   'modelQwenField',
+  claude_cli:   'modelClaudeField',
+  gemini_cli:   'modelGeminiField',
+  qwen_cli:     'modelQwenField',
+  opencode_cli: 'modelOpenCodeField',
 };
 function updateProviderUI() {
   const p = $('provider').value;
