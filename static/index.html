@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Writeup Agent · مُلخّص الـ Writeups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --bg-elev: #15151a;
+    --bg-elev-2: #1c1c22;
+    --border: #2a2a32;
+    --border-strong: #3a3a44;
+    --text: #ebe5d3;
+    --text-dim: #a09b8e;
+    --text-muted: #6b6760;
+    --accent: #ff7a3d;
+    --accent-dim: #b85726;
+    --critical: #ef4444;
+    --high: #f97316;
+    --medium: #eab308;
+    --low: #22c55e;
+    --success: #22c55e;
+    --error: #ef4444;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 15% -5%, rgba(255,122,61,0.05) 0%, transparent 35%),
+      radial-gradient(circle at 95% 105%, rgba(255,122,61,0.04) 0%, transparent 35%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+
+  /* ─── Header ──────────────────────────────────────────── */
+  .brand {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 38px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .brand-title em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .brand-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+  }
+  .claude-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-elev);
+  }
+  .claude-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .claude-status.ok .dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .claude-status.err .dot { background: var(--error); }
+
+  /* ─── Settings ───────────────────────────────────────── */
+  .settings-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .settings-toggle:hover { border-color: var(--border-strong); color: var(--text); }
+  .settings-toggle .chev { transition: transform .2s ease; }
+  .settings-toggle.open .chev { transform: rotate(90deg); }
+
+  .settings-panel {
+    display: none;
+    margin-top: 12px;
+    padding: 20px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+  .settings-panel.open { display: block; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    direction: ltr;
+    text-align: left;
+    transition: border-color .15s ease;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .settings-save {
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .settings-save:hover { background: var(--border); }
+  .settings-save.saved { border-color: var(--success); color: var(--success); }
+
+  /* ─── URL input section ───────────────────────────────── */
+  .input-card {
+    margin-top: 32px;
+    padding: 28px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    position: relative;
+  }
+  .input-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 60px; height: 60px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+    pointer-events: none;
+  }
+
+  .input-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .url-input {
+    width: 100%;
+    padding: 16px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    direction: ltr;
+    text-align: left;
+    transition: border-color .15s ease;
+  }
+  .url-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,122,61,0.1);
+  }
+  .url-input::placeholder { color: var(--text-muted); }
+
+  .analyze-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .analyze-btn:hover:not(:disabled) {
+    background: #ff8c5a;
+    transform: translateY(-1px);
+  }
+  .analyze-btn:disabled {
+    background: var(--bg-elev-2);
+    color: var(--text-muted);
+    cursor: not-allowed;
+  }
+
+  /* ─── Stages indicator ───────────────────────────────── */
+  .stages {
+    margin-top: 32px;
+    display: none;
+    padding: 24px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+  .stages.visible { display: block; }
+  .stages-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .stage-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 1px dashed var(--border);
+  }
+  .stage-row:last-child { border-bottom: none; }
+  .stage-row.active { color: var(--text); }
+  .stage-row.done { color: var(--success); }
+  .stage-row .icon {
+    width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stage-row.pending .icon::before { content: '○'; color: var(--text-muted); }
+  .stage-row.active .icon::before {
+    content: '';
+    width: 12px; height: 12px;
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  .stage-row.done .icon::before { content: '✓'; color: var(--success); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── Error ───────────────────────────────────────────── */
+  .error-box {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 2px;
+    color: #fca5a5;
+    font-size: 14px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+  .error-box strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--error);
+    font-weight: 600;
+  }
+
+  /* ─── Result card ─────────────────────────────────────── */
+  .result {
+    margin-top: 32px;
+    display: none;
+    animation: fadeUp .4s ease;
+  }
+  .result.visible { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    padding: 24px 28px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px 2px 0 0;
+    border-bottom: none;
+    position: relative;
+  }
+  .result-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: -1px;
+    width: 60px; height: 60px;
+    border-bottom: 2px solid var(--success);
+    border-left: 2px solid var(--success);
+    pointer-events: none;
+  }
+  .result-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 12px;
+    direction: ltr;
+    text-align: left;
+  }
+  .result-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge.severity-Critical { border-color: var(--critical); color: var(--critical); }
+  .badge.severity-High { border-color: var(--high); color: var(--high); }
+  .badge.severity-Medium { border-color: var(--medium); color: var(--medium); }
+  .badge.severity-Low { border-color: var(--low); color: var(--low); }
+
+  .result-paths {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .result-paths dt { color: var(--text-muted); }
+  .result-paths dd {
+    color: var(--text-dim);
+    direction: ltr;
+    text-align: left;
+    word-break: break-all;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 28px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all .15s ease;
+    border-radius: 2px;
+  }
+  .action-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .action-btn.copied { color: var(--success); border-color: var(--success); }
+
+  .preview-toggle {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .preview-toggle-btn {
+    width: 100%;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .preview-toggle-btn:hover { color: var(--text); }
+  .preview-toggle-btn .chev { transition: transform .2s ease; }
+  .preview-toggle-btn.open .chev { transform: rotate(90deg); }
+
+  .preview {
+    display: none;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 24px 28px;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 0 0 2px 2px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    word-break: break-word;
+    direction: ltr;
+    text-align: left;
+  }
+  .preview.open { display: block; }
+  .preview::-webkit-scrollbar { width: 8px; }
+  .preview::-webkit-scrollbar-track { background: var(--bg); }
+  .preview::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+  /* ─── History ────────────────────────────────────────── */
+  .history {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .history-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .history-empty {
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 32px 0;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: border-color .15s ease;
+  }
+  .history-item:hover { border-color: var(--border-strong); }
+  .history-item .h-title {
+    flex: 1;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text);
+    direction: ltr;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-item .h-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── Footer ──────────────────────────────────────────── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header class="brand">
+    <div>
+      <h1 class="brand-title">writeup<em>·agent</em></h1>
+      <p class="brand-subtitle" style="margin-top:6px">Bug Bounty Writeups → Obsidian</p>
+    </div>
+    <div id="claudeStatus" class="claude-status">
+      <span class="dot"></span><span id="claudeStatusText">Checking Claude...</span>
+    </div>
+  </header>
+
+  <!-- Settings -->
+  <button id="settingsToggle" class="settings-toggle">
+    <span>⚙ &nbsp; إعدادات المسارات</span>
+    <span class="chev">›</span>
+  </button>
+  <div id="settingsPanel" class="settings-panel">
+    <div class="field">
+      <label for="vaultPath">مسار الـ Obsidian Vault</label>
+      <input type="text" id="vaultPath" placeholder="/Users/you/Documents/MyVault" />
+      <div class="field-hint">المسار المطلق للـ vault. الملفات هتتحفظ جواه في subfolder.</div>
+    </div>
+    <div class="field">
+      <label for="notesSubdir">مجلد الملاحظات (Notes Subdirectory)</label>
+      <input type="text" id="notesSubdir" placeholder="Writeups" />
+    </div>
+    <div class="field">
+      <label for="attachmentsSubdir">مجلد الصور (Attachments Subdirectory)</label>
+      <input type="text" id="attachmentsSubdir" placeholder="attachments" />
+    </div>
+    <div class="field">
+      <label for="provider">الـ AI Provider</label>
+      <select id="provider">
+        <optgroup label="Local CLIs (مفيش API key)">
+          <option value="claude_cli">Claude CLI (Claude Max)</option>
+          <option value="gemini_cli">Gemini CLI (Google login — في free tier)</option>
+          <option value="qwen_cli">Qwen Code CLI (Alibaba — في free tier)</option>
+        </optgroup>
+        <optgroup label="HTTP APIs (محتاج API key)">
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="anthropic_api">Anthropic API</option>
+          <option value="gemini">Google Gemini API</option>
+          <option value="openrouter">OpenRouter (أي model)</option>
+        </optgroup>
+      </select>
+      <div class="field-hint">الـ Local CLIs محتاجة التثبيت أول مرة (claude / gemini / qwen). الـ HTTP APIs محتاجة API key.</div>
+    </div>
+    <div class="field" id="apiKeyField">
+      <label for="apiKey">API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off" />
+      <div class="field-hint">بتتحفظ محلياً في <code>~/.writeup-agent/config.json</code> — متشركهاش مع حد.</div>
+    </div>
+    <div class="field" id="modelClaudeField">
+      <label for="modelClaude">موديل Claude</label>
+      <select id="modelClaude">
+        <optgroup label="Aliases (تلقائياً بيمشي على الأحدث)">
+          <option value="sonnet">sonnet — متوازن (Recommended)</option>
+          <option value="opus">opus — أعمق وأبطأ</option>
+          <option value="haiku">haiku — أسرع وأرخص</option>
+        </optgroup>
+        <optgroup label="Claude 4.x (specific IDs)">
+          <option value="claude-opus-4-7">claude-opus-4-7</option>
+          <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+          <option value="claude-sonnet-4-5-20250929">claude-sonnet-4-5-20250929</option>
+          <option value="claude-haiku-4-5-20251001">claude-haiku-4-5-20251001</option>
+          <option value="claude-opus-4-5">claude-opus-4-5</option>
+          <option value="claude-opus-4-1">claude-opus-4-1</option>
+          <option value="claude-opus-4">claude-opus-4</option>
+          <option value="claude-sonnet-4">claude-sonnet-4</option>
+        </optgroup>
+        <option value="">Default (اللي الـ CLI بيختاره)</option>
+      </select>
+      <div class="field-hint">الـ aliases (sonnet/opus/haiku) بتتحدث تلقائياً للأحدث. الـ specific IDs مش بتتغير.</div>
+    </div>
+    <div class="field" id="modelQwenField">
+      <label for="modelQwen">موديل Qwen</label>
+      <select id="modelQwen">
+        <optgroup label="Qwen 3 (الأحدث)">
+          <option value="qwen3-max">qwen3-max — الأعمق للـ analysis (Recommended)</option>
+          <option value="qwen-plus">qwen-plus — متوازن وأسرع</option>
+          <option value="qwen-turbo">qwen-turbo — أسرع وأرخص</option>
+        </optgroup>
+        <optgroup label="Coder models (للـ code analysis تحديداً)">
+          <option value="qwen3-coder-plus">qwen3-coder-plus</option>
+          <option value="qwen3-coder-flash">qwen3-coder-flash</option>
+        </optgroup>
+        <option value="">Default (اللي الـ CLI بيختاره)</option>
+      </select>
+      <div class="field-hint">الـ qwen3-coder-* models بتديك أحسن نتيجة في تحليل الـ writeups.</div>
+    </div>
+    <div class="field" id="modelGeminiField">
+      <label for="modelGemini">موديل Gemini</label>
+      <select id="modelGemini">
+        <optgroup label="Gemini 2.5 (الأحدث)">
+          <option value="gemini-2.5-flash">gemini-2.5-flash — سريع، quota سخي (Recommended)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro — الأقوى بس quota محدودة (50/يوم)</option>
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite — أسرع حاجة</option>
+        </optgroup>
+        <optgroup label="Gemini 2.0">
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        </optgroup>
+        <optgroup label="Gemini 1.5 (older)">
+          <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+        </optgroup>
+        <option value="">Default (اللي الـ CLI بيختاره)</option>
+      </select>
+      <div class="field-hint">الـ free tier من Google login بيدي 1000 طلب/يوم على gemini-2.5-pro.</div>
+    </div>
+    <div class="field" id="modelTextField">
+      <label for="model">الموديل</label>
+      <input type="text" id="model" placeholder="gpt-4o-mini" />
+      <div class="field-hint" id="modelHint">اسم الموديل من الـ provider (مثلاً gpt-4o-mini, gemini-2.0-flash).</div>
+    </div>
+    <button id="saveSettings" class="settings-save">حفظ الإعدادات</button>
+  </div>
+
+  <!-- URL Input -->
+  <section class="input-card">
+    <label for="urlInput" class="input-label">▸ لينك الـ Writeup</label>
+    <input type="url" id="urlInput" class="url-input"
+           placeholder="https://medium.com/@researcher/some-bug-writeup..." />
+    <button id="analyzeBtn" class="analyze-btn">
+      <span>تحليل وحفظ في Obsidian</span>
+      <span>→</span>
+    </button>
+  </section>
+
+  <!-- Stages -->
+  <section id="stages" class="stages">
+    <div class="stages-title">⏵ Progress</div>
+    <div class="stage-row" data-stage="fetch"><span class="icon"></span><span>جلب صفحة الـ writeup</span></div>
+    <div class="stage-row" data-stage="extract"><span class="icon"></span><span>استخراج المحتوى والصور</span></div>
+    <div class="stage-row" data-stage="claude"><span class="icon"></span><span>تحليل بواسطة Claude (قد ياخد دقيقة-دقيقتين)</span></div>
+    <div class="stage-row" data-stage="images"><span class="icon"></span><span>تنزيل الصور للـ attachments</span></div>
+    <div class="stage-row" data-stage="save"><span class="icon"></span><span>حفظ الملف في الـ Vault</span></div>
+  </section>
+
+  <!-- Error -->
+  <div id="errorBox" class="error-box">
+    <strong>في مشكلة:</strong>
+    <span id="errorMessage"></span>
+  </div>
+
+  <!-- Result -->
+  <section id="result" class="result">
+    <div class="result-header">
+      <h2 id="resultTitle" class="result-title"></h2>
+      <div id="resultBadges" class="result-badges"></div>
+      <dl class="result-paths">
+        <dt>📝 الملف:</dt>      <dd id="resultPath"></dd>
+        <dt>📁 الصور:</dt>      <dd id="resultImages"></dd>
+        <dt>🏷️ الـ Tags:</dt>   <dd id="resultTags"></dd>
+      </dl>
+    </div>
+    <div class="result-actions">
+      <button id="copyPath" class="action-btn">نسخ مسار الملف</button>
+      <button id="copyMd" class="action-btn">نسخ الـ Markdown</button>
+      <button id="downloadMd" class="action-btn">تحميل .md</button>
+    </div>
+    <div class="preview-toggle">
+      <button id="previewToggle" class="preview-toggle-btn">
+        <span>عرض الـ Markdown</span><span class="chev">›</span>
+      </button>
+    </div>
+    <pre id="preview" class="preview"></pre>
+  </section>
+
+  <!-- History -->
+  <section class="history">
+    <div class="history-title">⏵ التحليلات في الجلسة دي</div>
+    <div id="historyList"></div>
+  </section>
+
+  <footer class="footer">
+    Running locally on Claude Max · No API keys · Your data never leaves your machine
+  </footer>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const stages = ['fetch', 'extract', 'claude', 'images', 'save'];
+const history = [];
+
+// ─── Provider status check ─────────────────────────────────
+async function checkClaude() {
+  try {
+    const r = await fetch('/api/check-provider');
+    const data = await r.json();
+    const el = $('claudeStatus');
+    const txt = $('claudeStatusText');
+    if (data.ok) {
+      el.classList.remove('err');
+      el.classList.add('ok');
+      txt.textContent = (data.provider || 'AI') + ' · ' + (data.version || 'ready');
+    } else {
+      el.classList.remove('ok');
+      el.classList.add('err');
+      txt.textContent = (data.provider || 'Provider') + ' غير متاح';
+    }
+  } catch {
+    $('claudeStatus').classList.add('err');
+    $('claudeStatusText').textContent = 'Server غير متاح';
+  }
+}
+
+// ─── Provider UI helpers ────────────────────────────────
+const LOCAL_CLI_PROVIDERS = ['claude_cli', 'gemini_cli', 'qwen_cli'];
+const MODEL_PLACEHOLDER = {
+  claude_cli: 'sonnet',
+  gemini_cli: 'gemini-2.5-pro (CLI default)',
+  qwen_cli: 'qwen3-coder-plus (CLI default)',
+  openai: 'gpt-4o-mini',
+  anthropic_api: 'claude-sonnet-4-5-20250929',
+  gemini: 'gemini-2.0-flash',
+  openrouter: 'google/gemini-2.5-flash',
+};
+const PROVIDERS_WITH_MODEL_DROPDOWN = {
+  claude_cli: 'modelClaudeField',
+  gemini_cli: 'modelGeminiField',
+  qwen_cli:   'modelQwenField',
+};
+function updateProviderUI() {
+  const p = $('provider').value;
+  const isLocalCli = LOCAL_CLI_PROVIDERS.includes(p);
+  $('apiKeyField').style.display = isLocalCli ? 'none' : 'block';
+  // Hide all dropdown fields, then show only the one for the current provider.
+  Object.values(PROVIDERS_WITH_MODEL_DROPDOWN).forEach(id => {
+    $(id).style.display = 'none';
+  });
+  const dropdownId = PROVIDERS_WITH_MODEL_DROPDOWN[p];
+  if (dropdownId) $(dropdownId).style.display = 'block';
+  $('modelTextField').style.display = dropdownId ? 'none' : 'block';
+  $('model').placeholder = MODEL_PLACEHOLDER[p] || '';
+}
+
+// ─── Config load/save ────────────────────────────────────
+async function loadConfig() {
+  const r = await fetch('/api/config');
+  const cfg = await r.json();
+  $('vaultPath').value = cfg.vault_path || '';
+  $('notesSubdir').value = cfg.notes_subdir || '';
+  $('attachmentsSubdir').value = cfg.attachments_subdir || '';
+  const provider = cfg.provider || 'claude_cli';
+  $('provider').value = provider;
+  $('apiKey').value = cfg.api_key || '';
+  const m = cfg.model || '';
+  const dropdownId = PROVIDERS_WITH_MODEL_DROPDOWN[provider];
+  if (dropdownId) {
+    const selectId = dropdownId.replace('Field', '');  // modelClaudeField → modelClaude
+    const sel = $(selectId);
+    if (m && !Array.from(sel.options).some(o => o.value === m)) {
+      sel.add(new Option(m + ' (custom)', m, true, true));
+    }
+    sel.value = m;
+    $('model').value = '';
+  } else {
+    $('model').value = m;
+  }
+  updateProviderUI();
+}
+
+async function saveConfig() {
+  const provider = $('provider').value;
+  const dropdownId = PROVIDERS_WITH_MODEL_DROPDOWN[provider];
+  const model = dropdownId
+    ? $(dropdownId.replace('Field', '')).value
+    : $('model').value.trim();
+  const cfg = {
+    vault_path: $('vaultPath').value.trim(),
+    notes_subdir: $('notesSubdir').value.trim() || 'Writeups',
+    attachments_subdir: $('attachmentsSubdir').value.trim() || 'attachments',
+    provider: provider,
+    api_key: $('apiKey').value.trim(),
+    model: model,
+  };
+  const r = await fetch('/api/config', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(cfg),
+  });
+  if (r.ok) {
+    const btn = $('saveSettings');
+    btn.classList.add('saved');
+    btn.textContent = '✓ تم الحفظ';
+    setTimeout(() => {
+      btn.classList.remove('saved');
+      btn.textContent = 'حفظ الإعدادات';
+    }, 1500);
+  }
+}
+
+// ─── Stage indicators ───────────────────────────────────
+function resetStages() {
+  stages.forEach(s => {
+    const el = document.querySelector(`[data-stage="${s}"]`);
+    el.classList.remove('active', 'done');
+    el.classList.add('pending');
+  });
+}
+function setStage(stageName, status) {
+  const el = document.querySelector(`[data-stage="${stageName}"]`);
+  if (!el) return;
+  el.classList.remove('pending', 'active', 'done');
+  el.classList.add(status);
+}
+
+// Simulate progressive stages on the client side based on timing
+let stageTimers = [];
+function startStageSimulation() {
+  // We don't have real progress events from server, but we know rough timing.
+  // fetch+extract: ~3-8s, claude: ~30-90s, images+save: ~2-5s
+  resetStages();
+  $('stages').classList.add('visible');
+
+  setStage('fetch', 'active');
+  stageTimers.push(setTimeout(() => {
+    setStage('fetch', 'done');
+    setStage('extract', 'active');
+  }, 1500));
+  stageTimers.push(setTimeout(() => {
+    setStage('extract', 'done');
+    setStage('claude', 'active');
+  }, 4000));
+}
+function stopStageSimulation() {
+  stageTimers.forEach(clearTimeout);
+  stageTimers = [];
+}
+function finalizeStages() {
+  stopStageSimulation();
+  ['fetch','extract','claude','images','save'].forEach(s => setStage(s, 'done'));
+}
+
+// ─── Analyze flow ────────────────────────────────────────
+async function analyze() {
+  const url = $('urlInput').value.trim();
+  if (!url) { $('urlInput').focus(); return; }
+
+  $('errorBox').classList.remove('visible');
+  $('result').classList.remove('visible');
+  $('analyzeBtn').disabled = true;
+  $('analyzeBtn').querySelector('span').textContent = 'جاري التحليل...';
+
+  startStageSimulation();
+
+  try {
+    const r = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url}),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) {
+      throw new Error(data.error || `HTTP ${r.status}`);
+    }
+    finalizeStages();
+    showResult(data, url);
+  } catch (e) {
+    stopStageSimulation();
+    $('stages').classList.remove('visible');
+    $('errorMessage').textContent = e.message;
+    $('errorBox').classList.add('visible');
+  } finally {
+    $('analyzeBtn').disabled = false;
+    $('analyzeBtn').querySelector('span').textContent = 'تحليل وحفظ في Obsidian';
+  }
+}
+
+function showResult(data, sourceUrl) {
+  $('resultTitle').textContent = data.title;
+
+  const badges = [];
+  if (data.severity) {
+    badges.push(`<span class="badge severity-${data.severity}">${data.severity}</span>`);
+  }
+  if (data.vulnerability_type) {
+    badges.push(`<span class="badge">${data.vulnerability_type}</span>`);
+  }
+  if (data.target) {
+    badges.push(`<span class="badge">🎯 ${data.target}</span>`);
+  }
+  $('resultBadges').innerHTML = badges.join('');
+
+  $('resultPath').textContent = data.note_path;
+  $('resultImages').textContent = data.image_count > 0
+    ? `${data.image_count} صورة → ${data.attachments_dir}`
+    : 'لا توجد صور';
+  $('resultTags').textContent = (data.tags || []).map(t => `#${t}`).join('  ') || '—';
+
+  $('preview').textContent = data.markdown;
+
+  $('result').classList.add('visible');
+  $('result').scrollIntoView({behavior: 'smooth', block: 'start'});
+
+  // Add to history
+  history.unshift({title: data.title, severity: data.severity, time: new Date(), url: sourceUrl, path: data.note_path});
+  renderHistory();
+
+  // Store markdown for copy/download
+  window._lastMarkdown = data.markdown;
+  window._lastMarkdownPortable = data.markdown_portable || data.markdown;
+  window._lastPath = data.note_path;
+  window._lastSlug = data.slug || (data.title || 'writeup').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function renderHistory() {
+  const el = $('historyList');
+  if (history.length === 0) {
+    el.innerHTML = '<div class="history-empty">لسه مفيش تحليلات. ابدأ بلينك فوق ↑</div>';
+    return;
+  }
+  el.innerHTML = history.map(h => `
+    <div class="history-item">
+      <span class="badge severity-${h.severity || 'Unknown'}">${h.severity || '—'}</span>
+      <span class="h-title">${escapeHtml(h.title)}</span>
+      <span class="h-meta">${h.time.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─── Copy / Download ────────────────────────────────────
+async function copyToClipboard(text, btnId) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = $(btnId);
+    const orig = btn.textContent;
+    btn.classList.add('copied');
+    btn.textContent = '✓ تم النسخ';
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1500);
+  } catch {}
+}
+
+function downloadMarkdown() {
+  const md = window._lastMarkdownPortable || window._lastMarkdown;
+  if (!md) return;
+  const slug = window._lastSlug || 'writeup';
+  const blob = new Blob([md], {type: 'text/markdown;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${slug}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Event wiring ───────────────────────────────────────
+$('settingsToggle').addEventListener('click', () => {
+  $('settingsToggle').classList.toggle('open');
+  $('settingsPanel').classList.toggle('open');
+});
+
+$('saveSettings').addEventListener('click', () => { saveConfig().then(checkClaude); });
+$('provider').addEventListener('change', updateProviderUI);
+$('analyzeBtn').addEventListener('click', analyze);
+$('urlInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') analyze();
+});
+
+$('previewToggle').addEventListener('click', () => {
+  $('previewToggle').classList.toggle('open');
+  $('preview').classList.toggle('open');
+});
+
+$('copyPath').addEventListener('click', () => copyToClipboard(window._lastPath || '', 'copyPath'));
+$('copyMd').addEventListener('click', () => copyToClipboard(window._lastMarkdown || '', 'copyMd'));
+$('downloadMd').addEventListener('click', downloadMarkdown);
+
+// ─── Boot ───────────────────────────────────────────────
+checkClaude();
+loadConfig();
+renderHistory();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Runtime / local state
+server.log
+*.log
+.writeup-agent/
+
+# Local test data — never commit a real Obsidian vault
+TestVault/
+*Vault/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# Build / dist
+dist/
+build/
+*.egg
