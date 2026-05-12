@@ -670,16 +670,25 @@ SEVERITY_BADGE = {
 
 def embed_screenshots(text: str, image_map_by_index, attachments_prefix: str,
                        fallback_urls=None) -> str:
-    """Replace [Screenshot N] tokens with Obsidian embeds.
+    """Replace [Screenshot N] tokens with image embeds.
+
+    We use **standard markdown** with a relative path (`![](../attachments/
+    <slug>/<file>)`) rather than Obsidian wiki-links (`![[file]]`).
+
+    Why: Obsidian wiki-links only resolve when the user has the right vault
+    open in Obsidian — if their vault is pointed at a different folder
+    (very common: existing personal vault on Desktop, default vault, etc.)
+    the file is on disk but Obsidian's filename index doesn't see it and
+    the note shows '"file.webp" could not be found'.
+
+    Relative-path standard markdown sidesteps the entire vault-index
+    machinery and just resolves the path from the .md file's own location.
+    It works in Obsidian regardless of vault config, AND in every other
+    markdown viewer (VS Code, GitHub, browser preview).
 
     Resolution order for each [Screenshot N]:
-      1. If the image was downloaded successfully → bare-filename Obsidian
-         embed `![[file.webp]]` (Obsidian finds it regardless of the user's
-         "New link format" setting).
-      2. If the download failed but we know the source URL → fall back to
-         a standard markdown embed `![](https://...)`. Obsidian renders
-         remote images inline, so the note stays useful even if the CDN
-         blocked our fetch or the user's vault root is misconfigured.
+      1. File downloaded → `![](../<attachments_prefix>/<fname>)`
+      2. Download failed but source URL known → `![](https://...)`
       3. Otherwise leave [Screenshot N] alone.
     """
     fallback_urls = fallback_urls or {}
@@ -688,7 +697,7 @@ def embed_screenshots(text: str, image_map_by_index, attachments_prefix: str,
         idx = int(m.group(1))
         fname = image_map_by_index.get(idx)
         if fname:
-            return f"\n\n![[{fname}]]\n\n"
+            return f"\n\n![](../{attachments_prefix}/{fname})\n\n"
         url = fallback_urls.get(idx)
         if url:
             return f"\n\n![]({url})\n\n"
@@ -829,7 +838,7 @@ def build_obsidian_md(data: dict, source_url: str, image_map_by_index,
             lines.append(f"**Screenshot {idx}**")
             fname = image_map_by_index.get(idx)
             if fname:
-                lines.append(f"![[{fname}]]")
+                lines.append(f"![](../{attachments_prefix}/{fname})")
             elif fallback_urls.get(idx):
                 lines.append(f"![]({fallback_urls[idx]})")
             lines.append("")
@@ -958,11 +967,23 @@ def analyze():
             fname_to_datauri[fname] = f"data:{ct};base64,{b64}"
 
         def _to_portable(m):
-            inner = m.group(1)
-            fname = inner.split("/")[-1]
+            src = m.group(1).strip()
+            # External URLs (remote-fallback embeds) stay as-is — the user
+            # downloading the portable .md will still load them from source.
+            if src.startswith(("http://", "https://", "data:")):
+                return m.group(0)
+            # Local relative path → inline as base64 so the .md is fully
+            # self-contained when shared / opened outside the vault.
+            fname = src.split("/")[-1]
             uri = fname_to_datauri.get(fname)
             return f"![]({uri})" if uri else m.group(0)
-        md_portable = re.sub(r"!\[\[([^\]]+)\]\]", _to_portable, md_content)
+        # Match BOTH styles, in case older notes from before this commit
+        # used the wiki-link syntax: ![[...]] and standard ![]( ... ).
+        md_portable = re.sub(r"!\[\[([^\]]+)\]\]",
+                              lambda m: _to_portable(m),
+                              md_content)
+        md_portable = re.sub(r"!\[[^\]]*\]\(([^)]+)\)",
+                              _to_portable, md_portable)
 
         note_path = notes_dir / f"{slug}.md"
         if note_path.exists():
