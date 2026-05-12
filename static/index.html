@@ -695,6 +695,44 @@
       </select>
       <div class="field-hint">الـ free tier من Google login بيدي 1000 طلب/يوم على gemini-2.5-pro.</div>
     </div>
+    <div class="field" id="modelGeminiApiField">
+      <label for="modelGeminiApi">موديل Gemini API</label>
+      <select id="modelGeminiApi">
+        <optgroup label="Gemini 2.5 (الأحدث)">
+          <option value="gemini-2.5-flash">gemini-2.5-flash (Recommended)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro — الأقوى</option>
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite — أرخص</option>
+        </optgroup>
+        <optgroup label="Gemini 2.0">
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        </optgroup>
+      </select>
+      <div class="field-hint">الـ free tier الخاص بـ API key (مش login) — عنده quota محدودة لكل model.</div>
+    </div>
+    <div class="field" id="modelOpenAIField">
+      <label for="modelOpenAI">موديل OpenAI</label>
+      <select id="modelOpenAI">
+        <option value="gpt-4o-mini">gpt-4o-mini — رخيص وسريع (Recommended)</option>
+        <option value="gpt-4o">gpt-4o — الأقوى</option>
+        <option value="gpt-4-turbo">gpt-4-turbo</option>
+        <option value="o1-mini">o1-mini — reasoning</option>
+        <option value="o1">o1 — أعمق reasoning</option>
+        <option value="gpt-3.5-turbo">gpt-3.5-turbo — أقدم وأرخص</option>
+      </select>
+      <div class="field-hint">gpt-4o-mini ~$0.001 لكل writeup. gpt-4o أقوى لكن أغلى ~$0.01.</div>
+    </div>
+    <div class="field" id="modelAnthropicField">
+      <label for="modelAnthropic">موديل Anthropic</label>
+      <select id="modelAnthropic">
+        <option value="claude-sonnet-4-5-20250929">claude-sonnet-4-5 (Recommended)</option>
+        <option value="claude-haiku-4-5-20251001">claude-haiku-4-5 — أسرع وأرخص</option>
+        <option value="claude-opus-4-7">claude-opus-4-7 — الأقوى</option>
+        <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+        <option value="claude-opus-4-1">claude-opus-4-1</option>
+      </select>
+      <div class="field-hint">Haiku ~$0.001، Sonnet ~$0.005، Opus ~$0.05 لكل writeup.</div>
+    </div>
     <div class="field" id="modelTextField">
       <label for="model">الموديل</label>
       <input type="text" id="model" placeholder="gpt-4o-mini" />
@@ -806,10 +844,13 @@ const MODEL_PLACEHOLDER = {
   openrouter: 'google/gemini-2.5-flash',
 };
 const PROVIDERS_WITH_MODEL_DROPDOWN = {
-  claude_cli:   'modelClaudeField',
-  gemini_cli:   'modelGeminiField',
-  qwen_cli:     'modelQwenField',
-  opencode_cli: 'modelOpenCodeField',
+  claude_cli:    'modelClaudeField',
+  gemini_cli:    'modelGeminiField',
+  qwen_cli:      'modelQwenField',
+  opencode_cli:  'modelOpenCodeField',
+  gemini:        'modelGeminiApiField',
+  openai:        'modelOpenAIField',
+  anthropic_api: 'modelAnthropicField',
 };
 function updateProviderUI() {
   const p = $('provider').value;
